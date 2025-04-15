@@ -67,7 +67,7 @@ const Success = () => {
           setLoading(false)
         }
       } catch (err) {
-        setError('Erro ao conectar com o servidor')
+        setError('Erro ao conectar com o servidor: ' + err.message)
         setLoading(false)
       }
     }

@@ -13,6 +13,6 @@ export default async function handler(req, res) {
 
     res.status(200).json({ name, birthdate, email, plan })
   } catch (err) {
-    res.status(500).json({ error: 'Failed to retrieve session' })
+    res.status(500).json({ error: `Failed to retrieve session:${err}` })
   }
 }

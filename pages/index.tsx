@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,7 @@ export default function Home() {
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [faqOpen, setFaqOpen] = useState(null)
   const [email, setEmail] = useState('')
-  const [clientReviews, setClientReviews] = useState([
+  const [clientReviews] = useState([
     {
       name: 'João Silva',
       review: 'A experiência foi incrível! A previsão estava super precisa, recomendo muito!',
@@ -50,11 +50,11 @@ export default function Home() {
     setLoading(false)
   }
 
-  const handlePlanSelect = (plan: any) => {
+  const handlePlanSelect = (plan) => { 
     setSelectedPlan(plan)
   }
 
-  const toggleFaq = (index: any) => {
+  const toggleFaq = (index) => {
     setFaqOpen(faqOpen === index ? null : index)
   }
 
