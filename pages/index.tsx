@@ -35,7 +35,6 @@ export default function Home() {
   const router = useRouter()
 
   const handleSubmit = async () => {
-    setPreview('');
     if (!selectedPlan) {
       alert("Por favor, selecione um plano antes de continuar.");
       return;
@@ -92,7 +91,7 @@ export default function Home() {
             className="mb-3"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            disabled={loading}
+            disabled={loading || preview != ''}
           />
           <Input
             placeholder="Seu e-mail para envio da leitura"
@@ -100,7 +99,7 @@ export default function Home() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
+            disabled={loading || preview != ''}
           />
           <Input
             placeholder="Sua data de nascimento"
@@ -110,7 +109,7 @@ export default function Home() {
             max={new Date().toISOString().split('T')[0]}
             value={birthdate}
             onChange={(e) => setBirthdate(e.target.value)}
-            disabled={loading}
+            disabled={loading || preview != ''}
           />
 
           {/* Seleção do Plano */}
