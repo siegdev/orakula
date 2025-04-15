@@ -21,7 +21,8 @@ export default async function handler(req, res) {
     await browser.close()
 
     const pdfName = `leitura-${uuidv4()}.pdf`
-    const pdfPath = path.join(process.cwd(), 'public', 'pdfs', pdfName)
+    const pdfPath = path.join('/tmp', filename)
+    
 
     // Garante que o diretório exista
     fs.mkdirSync(path.dirname(pdfPath), { recursive: true })
