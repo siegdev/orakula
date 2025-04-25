@@ -3,8 +3,8 @@ import { S3 } from 'aws-sdk'
 
 const s3 = new S3({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  accessKeyId: process.env.VAR_AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.VAR_AWS_SECRET_ACCESS_KEY,
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
