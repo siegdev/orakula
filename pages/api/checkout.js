@@ -10,19 +10,19 @@ export default async function handler(req, res) {
   }
 
   const { plan, name, birthdate, email } = req.body
-  const mode = process.env.STRIPE_MODE || 'test'
+  const mode = process.env.NEXT_PUBLIC_STRIPE_MODE || 'test'
 
   // Define os preços com base no modo
   const priceMap = {
     basic: mode === 'live'
-      ? process.env.STRIPE_PRICE_BASIC_LIVE
-      : process.env.STRIPE_PRICE_BASIC_TEST,
+      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC_LIVE
+      : process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC_TEST,
     intermediate: mode === 'live'
-      ? process.env.STRIPE_PRICE_INTERMEDIATE_LIVE
-      : process.env.STRIPE_PRICE_INTERMEDIATE_TEST,
+      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_INTERMEDIATE_LIVE
+      : process.env.NEXT_PUBLIC_STRIPE_PRICE_INTERMEDIATE_TEST,
     advanced: mode === 'live'
-      ? process.env.STRIPE_PRICE_ADVANCED_LIVE
-      : process.env.STRIPE_PRICE_ADVANCED_TEST,
+      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ADVANCED_LIVE
+      : process.env.NEXT_PUBLIC_STRIPE_PRICE_ADVANCED_TEST,
   }
 
   const priceId = priceMap[plan]
@@ -41,8 +41,8 @@ export default async function handler(req, res) {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.BASE_URL}/cancel`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cancel`,
       metadata: {
         name,
         birthdate,
