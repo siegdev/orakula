@@ -1,49 +1,46 @@
 import nodemailer from 'nodemailer'
 import path from 'path'
-import { NextApiRequest, NextApiResponse } from 'next'
 
-interface RequestBody {
-  email: string
-  pdfUrl: string
-}
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { email, pdfUrl }: RequestBody = req.body
+  const { email, pdfUrl, fullReading } = req.body
 
-  if (!email || !pdfUrl) {
-    return res.status(400).json({ error: 'Email e PDF são obrigatórios.' })
+  if (!email || !pdfUrl || !fullReading) {
+    return res.status(400).json({ error: 'Email, PDF e leitura são obrigatórios.' })
   }
-
-  const pdfPath = path.join(process.cwd(), 'public', pdfUrl)
 
   const transporter = nodemailer.createTransport({
     host: 'smtp.hostinger.com',
     port: 587,
     secure: false,
     auth: {
-      user: process.env.NEXT_PUBLIC_SMTP_USER,
-      pass: process.env.NEXT_PUBLIC_SMTP_PASS,
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
     },
   })
 
   try {
-    await transporter.sendMail({
+    const mailOptions = {
       from: '"Orákula" <orakula@whdev.com.br>',
       to: email,
       subject: '🔮 Sua Leitura Completa do Orákula',
-      text: 'Sua leitura completa está em anexo.',
-      attachments: [
-        {
-          filename: 'leitura.pdf',
-          path: pdfPath,
-        },
-      ],
-    })
+      html: `
+        <h2>Sua Leitura Completa do Orákula 🔮</h2>
+        <p>Olá! Sua leitura completa está abaixo:</p>
+        <div style="background-color: #f4f4f4; padding: 15px; border-radius: 8px; margin-top: 20px;">
+          <p>${fullReading}</p>
+        </div>
+        <p style="margin-top: 20px;">Para acessar sua leitura completa posteriormente, clique no link abaixo:</p>
+        <p><a href="${process.env.NEXT_PUBLIC_BASE_URL}${pdfUrl}" target="_blank" style="color: #4e73df; text-decoration: none; font-weight: bold;">Acessar Leitura Completa</a></p>
+        <p style="margin-top: 20px;">Atenciosamente,<br />Equipe Orákula</p>
+      `,
+    }
+
+    await transporter.sendMail(mailOptions)
 
     return res.status(200).json({ ok: true })
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Erro ao enviar e-mail:', error)
     return res.status(500).json({ error: 'Erro ao enviar o e-mail.' })
   }

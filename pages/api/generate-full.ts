@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const chatRes = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -40,7 +40,9 @@ function buildPrompt(name: string, birthdate: string, plan: string): string {
   basePrompt += `Nome: ${name}\nData de nascimento: ${birthdate}\nPlano: ${plan}\n\n`
   basePrompt += `Gere uma previsão mística e envolvente. Use linguagem mística, elegante e positiva. Voce pode se basear em informacoes de astros e horóscopos.`
   
-  if (plan === 'intermediate') {
+  if(plan === 'basic') {
+    '\nInclua: número da sorte. Separe essas informaçoes em topicos especificos. Tente gerar em torno de 1000 a 1500 caracteres.'
+  } else if (plan === 'intermediate') {
     basePrompt += `\nInclua: número da sorte, cor da sorte e sorte do dia. Separe essas informaçoes em topicos especificos. Tente gerar em torno de 2000 caracteres.`
   } else if (plan === 'advanced') {
     basePrompt += `\nInclua: número da sorte, cor da sorte, sorte do dia e mensagens personalizadas profundas. Separe essas informaçoes em topicos especificos.
@@ -50,7 +52,8 @@ function buildPrompt(name: string, birthdate: string, plan: string): string {
   }
 
   basePrompt += `\n\nLembre-se, você é a Orákula, e suas palavras têm poder.`
-  basePrompt += `\n\nUse emojis mas nao de forma excessiva, e formate tudo com HTML para que seja uma leitura fácil e organizada pro usuario.`
+  basePrompt += `\n\nUse alguns emojis, nao em excesso, mas formate tudo com HTML para que seja uma leitura fácil e organizada pro usuario. Use tags <h1>, <h2>, <h3> e <p> para separar os tópicos.`
+  basePrompt += `\n\nA previsao vai ser impressa em uma folha A4, entao tente deixar tudo bem formatado e talvez meio centralizado.`
   basePrompt += `\n\nA previsão deve ser clara e direta, sem rodeios.`
   basePrompt += `\n\nA previsão deve ser otimista e encorajadora, mesmo que aborde desafios.`
   basePrompt += `\n\nA previsão deve ser única e personalizada, refletindo a individualidade da pessoa.`

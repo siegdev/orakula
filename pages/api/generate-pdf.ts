@@ -1,18 +1,17 @@
 import puppeteer from 'puppeteer'
 import { S3 } from 'aws-sdk'
-import { v4 as uuidv4 } from 'uuid'
 
 const s3 = new S3({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
-  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { html } = req.body
+  const { html, session_id } = req.body
 
   if (!html) {
     return res.status(400).json({ error: 'HTML é obrigatório.' })
@@ -26,11 +25,11 @@ export default async function handler(req: any, res: any) {
     const pdfBuffer = await page.pdf({ format: 'A4' })
     await browser.close()
 
-    const pdfName = `leitura-${uuidv4()}.pdf`
+    const pdfName = `leitura-${session_id}.pdf`
 
     const params = {
       Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!,
-      Key: `pdfs/${pdfName}`,
+      Key: `${pdfName}`,
       Body: pdfBuffer,
       ContentType: 'application/pdf',
       ACL: 'public-read', 

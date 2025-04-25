@@ -1,23 +1,13 @@
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
-interface SessionData {
-  name: string;
-  birthdate: string;
-  email: string;
-  plan: string;
-}
-
-interface ErrorResponse {
-  error: string;
-}
-
 const Success = () => {
   const router = useRouter()
   const { session_id } = router.query
-  const [fullReading, setFullReading] = useState<string | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [previousReading, setPreviousReading] = useState<string | null>(null)
 
   useEffect(() => {
     if (!session_id) return
@@ -25,16 +15,19 @@ const Success = () => {
     const fetchSessionData = async () => {
       try {
         const res = await fetch(`/api/session-data?session_id=${session_id}`)
-        const sessionData: SessionData | ErrorResponse = await res.json()
+        const sessionData = await res.json()
 
         if (res.ok) {
-          if ('error' in sessionData) {
-            setError(sessionData.error)
+          const { name, birthdate, email, plan } = sessionData
+
+          const pdfRes = await fetch(`/api/check-existing-pdf?session_id=${session_id}`)
+          const pdfData = await pdfRes.json()
+
+          if (pdfRes.ok && pdfData.pdfUrl) {
+            setPdfUrl(pdfData.pdfUrl)
             setLoading(false)
             return
           }
-
-          const { name, birthdate, email, plan } = sessionData
 
           const response = await fetch('/api/generate-full', {
             method: 'POST',
@@ -45,13 +38,12 @@ const Success = () => {
           const data = await response.json()
 
           if (response.ok) {
-            setFullReading(data.full)
-            setLoading(false)
+            const { full } = data
 
             const pdfRes = await fetch('/api/generate-pdf', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ html: data.full }),
+              body: JSON.stringify({ html: full, session_id }),
             })
 
             if (!pdfRes.ok) {
@@ -59,14 +51,19 @@ const Success = () => {
               return
             }
 
-            const pdfData = await pdfRes.json() 
+            const pdfData = await pdfRes.json()
 
+            // Atualiza o estado com o link para o PDF
+            setPdfUrl(pdfData.pdfUrl)
+
+            // Envia o email com o PDF
             const emailResponse = await fetch('/api/send-pdf-email', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                email,                  
+                email,
                 pdfUrl: pdfData.pdfUrl,
+                fullReading: full,
               }),
             })
 
@@ -75,26 +72,30 @@ const Success = () => {
               return
             }
 
+            setLoading(false)
           } else {
             setError(data.error || 'Erro ao gerar a leitura completa')
             setLoading(false)
           }
         } else {
-          setError('Erro ao buscar dados da sessão.')
+          setError(sessionData.error || 'Erro ao buscar dados da sessão')
           setLoading(false)
         }
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError('Erro ao conectar com o servidor: ' + err.message)
-        } else {
-          setError('Erro desconhecido.')
-        }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        setError('Erro ao conectar com o servidor: ' + err.message)
         setLoading(false)
       }
     }
 
     fetchSessionData()
   }, [session_id])
+
+  useEffect(() => {
+    if (pdfUrl) {
+      router.push(`${process.env.NEXT_PUBLIC_BASE_URL}${pdfUrl}`)
+    }
+  }, [pdfUrl, router])
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -105,11 +106,19 @@ const Success = () => {
       {loading && <p className="text-white text-center">Carregando sua leitura completa...</p>}
       {error && <p className="text-red-400 text-center">{error}</p>}
 
-      {fullReading && (
-        <div
-          className="bg-white text-black rounded-2xl p-6 shadow-lg space-y-4 prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: fullReading }}
-        />
+      {!loading && !error && !pdfUrl && !previousReading && (
+        <p className="text-white text-center">Redirecionando você para o seu PDF...</p>
+      )}
+
+      {previousReading && (
+        <div className="text-white text-center">
+          <p>A leitura já foi gerada. Você pode acessá-la abaixo:</p>
+          <p>
+            <a href={previousReading} className="text-blue-500" target="_blank" rel="noopener noreferrer">
+              Acessar leitura anterior
+            </a>
+          </p>
+        </div>
       )}
     </div>
   )
