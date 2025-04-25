@@ -1,15 +1,17 @@
 import puppeteer from 'puppeteer'
-import fs from 'fs'
-import path from 'path'
+import { S3 } from 'aws-sdk'
 import { v4 as uuidv4 } from 'uuid'
-import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).end()
-  }
+const s3 = new S3({
+  region: process.env.NEXT_PUBLIC_AWS_REGION,
+  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+})
 
-  const { html }: { html: string } = req.body
+export default async function handler(req: any, res: any) {
+  if (req.method !== 'POST') return res.status(405).end()
+
+  const { html } = req.body
 
   if (!html) {
     return res.status(400).json({ error: 'HTML é obrigatório.' })
@@ -24,14 +26,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await browser.close()
 
     const pdfName = `leitura-${uuidv4()}.pdf`
-    const pdfPath = path.join('/tmp', pdfName)
 
-    // Garante que o diretório exista
-    fs.mkdirSync(path.dirname(pdfPath), { recursive: true })
-    fs.writeFileSync(pdfPath, pdfBuffer)
+    const params = {
+      Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!,
+      Key: `pdfs/${pdfName}`,
+      Body: pdfBuffer,
+      ContentType: 'application/pdf',
+      ACL: 'public-read', 
+    }
 
-    // Retorna a URL do PDF
-    return res.status(200).json({ pdfUrl: `/pdfs/${pdfName}` })
+    const data = await s3.upload(params).promise()
+
+    const pdfUrl = data.Location
+
+    return res.status(200).json({ pdfUrl })
   } catch (error) {
     console.error('Erro ao gerar PDF:', error)
     return res.status(500).json({ error: 'Erro ao gerar PDF.' })
