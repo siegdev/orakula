@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer'
-import path from 'path'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -32,7 +31,7 @@ export default async function handler(req, res) {
           <p>${fullReading}</p>
         </div>
         <p style="margin-top: 20px;">Para acessar sua leitura completa posteriormente, clique no link abaixo:</p>
-        <p><a href="${process.env.NEXT_PUBLIC_BASE_URL}${pdfUrl}" target="_blank" style="color: #4e73df; text-decoration: none; font-weight: bold;">Acessar Leitura Completa</a></p>
+        <p><a href="${pdfUrl}" target="_blank" style="color: #4e73df; text-decoration: none; font-weight: bold;">Acessar Leitura Completa</a></p>
         <p style="margin-top: 20px;">Atenciosamente,<br />Equipe Orákula</p>
       `,
     }

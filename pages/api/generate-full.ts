@@ -41,7 +41,7 @@ function buildPrompt(name: string, birthdate: string, plan: string): string {
   basePrompt += `Gere uma previsão mística e envolvente. Use linguagem mística, elegante e positiva. Voce pode se basear em informacoes de astros e horóscopos.`
   
   if(plan === 'basic') {
-    '\nInclua: número da sorte. Separe essas informaçoes em topicos especificos. Tente gerar em torno de 1000 a 1500 caracteres.'
+    basePrompt += '\nInclua: número da sorte. Separe essas informaçoes em topicos especificos. Tente gerar em torno de 1000 a 1500 caracteres.'
   } else if (plan === 'intermediate') {
     basePrompt += `\nInclua: número da sorte, cor da sorte e sorte do dia. Separe essas informaçoes em topicos especificos. Tente gerar em torno de 2000 caracteres.`
   } else if (plan === 'advanced') {

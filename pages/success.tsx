@@ -7,7 +7,7 @@ const Success = () => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [previousReading, setPreviousReading] = useState<string | null>(null)
+  const [previousReading] = useState<string | null>(null)
 
   useEffect(() => {
     if (!session_id) return
