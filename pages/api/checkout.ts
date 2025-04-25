@@ -1,28 +1,36 @@
 import Stripe from 'stripe'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY, {
-  apiVersion: '2022-11-15',
+const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY as string, {
+  apiVersion: '2025-03-31.basil',
 })
 
-export default async function handler(req, res) {
+interface CheckoutRequestBody {
+  plan: 'basic' | 'intermediate' | 'advanced'
+  name: string
+  birthdate: string
+  email: string
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' })
   }
 
-  const { plan, name, birthdate, email } = req.body
+  const { plan, name, birthdate, email }: CheckoutRequestBody = req.body
   const mode = process.env.NEXT_PUBLIC_STRIPE_MODE || 'test'
 
   // Define os preços com base no modo
-  const priceMap = {
+  const priceMap: Record<string, string> = {
     basic: mode === 'live'
-      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC_LIVE
-      : process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC_TEST,
+      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC_LIVE as string
+      : process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC_TEST as string,
     intermediate: mode === 'live'
-      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_INTERMEDIATE_LIVE
-      : process.env.NEXT_PUBLIC_STRIPE_PRICE_INTERMEDIATE_TEST,
+      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_INTERMEDIATE_LIVE as string
+      : process.env.NEXT_PUBLIC_STRIPE_PRICE_INTERMEDIATE_TEST as string,
     advanced: mode === 'live'
-      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ADVANCED_LIVE
-      : process.env.NEXT_PUBLIC_STRIPE_PRICE_ADVANCED_TEST,
+      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ADVANCED_LIVE as string
+      : process.env.NEXT_PUBLIC_STRIPE_PRICE_ADVANCED_TEST as string,
   }
 
   const priceId = priceMap[plan]

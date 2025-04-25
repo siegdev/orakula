@@ -2,11 +2,14 @@ import puppeteer from 'puppeteer'
 import fs from 'fs'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end()
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).end()
+  }
 
-  const { html } = req.body
+  const { html }: { html: string } = req.body
 
   if (!html) {
     return res.status(400).json({ error: 'HTML é obrigatório.' })
@@ -21,8 +24,7 @@ export default async function handler(req, res) {
     await browser.close()
 
     const pdfName = `leitura-${uuidv4()}.pdf`
-    const pdfPath = path.join('/tmp', filename)
-    
+    const pdfPath = path.join('/tmp', pdfName)
 
     // Garante que o diretório exista
     fs.mkdirSync(path.dirname(pdfPath), { recursive: true })

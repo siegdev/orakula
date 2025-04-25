@@ -1,10 +1,10 @@
-// cancel.js
 import { useRouter } from 'next/router'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 
-export default function Cancel() {
+const Cancel = () => {
   const router = useRouter()
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-center text-white p-6 text-center">
       <Image src="/cancel-shadow.png" alt="Cancelado" width={120} height={120} />
@@ -16,3 +16,5 @@ export default function Cancel() {
     </div>
   )
 }
+
+export default Cancel

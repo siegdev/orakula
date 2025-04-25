@@ -1,12 +1,23 @@
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
+interface SessionData {
+  name: string;
+  birthdate: string;
+  email: string;
+  plan: string;
+}
+
+interface ErrorResponse {
+  error: string;
+}
+
 const Success = () => {
   const router = useRouter()
   const { session_id } = router.query
-  const [fullReading, setFullReading] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [fullReading, setFullReading] = useState<string | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!session_id) return
@@ -14,9 +25,15 @@ const Success = () => {
     const fetchSessionData = async () => {
       try {
         const res = await fetch(`/api/session-data?session_id=${session_id}`)
-        const sessionData = await res.json()
+        const sessionData: SessionData | ErrorResponse = await res.json()
 
         if (res.ok) {
+          if ('error' in sessionData) {
+            setError(sessionData.error)
+            setLoading(false)
+            return
+          }
+
           const { name, birthdate, email, plan } = sessionData
 
           const response = await fetch('/api/generate-full', {
@@ -48,8 +65,8 @@ const Success = () => {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                email,                  // email do usuário
-                pdfUrl: pdfData.pdfUrl, // ex: "/pdfs/xyz123.pdf"
+                email,                  
+                pdfUrl: pdfData.pdfUrl,
               }),
             })
 
@@ -63,11 +80,15 @@ const Success = () => {
             setLoading(false)
           }
         } else {
-          setError(sessionData.error || 'Erro ao buscar dados da sessão')
+          setError('Erro ao buscar dados da sessão.')
           setLoading(false)
         }
-      } catch (err) {
-        setError('Erro ao conectar com o servidor: ' + err.message)
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError('Erro ao conectar com o servidor: ' + err.message)
+        } else {
+          setError('Erro desconhecido.')
+        }
         setLoading(false)
       }
     }

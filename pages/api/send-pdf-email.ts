@@ -1,10 +1,16 @@
 import nodemailer from 'nodemailer'
 import path from 'path'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req, res) {
+interface RequestBody {
+  email: string
+  pdfUrl: string
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { email, pdfUrl } = req.body
+  const { email, pdfUrl }: RequestBody = req.body
 
   if (!email || !pdfUrl) {
     return res.status(400).json({ error: 'Email e PDF são obrigatórios.' })
@@ -37,7 +43,7 @@ export default async function handler(req, res) {
     })
 
     return res.status(200).json({ ok: true })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Erro ao enviar e-mail:', error)
     return res.status(500).json({ error: 'Erro ao enviar o e-mail.' })
   }
