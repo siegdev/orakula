@@ -2,15 +2,15 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 
-if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
+if (!process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || !process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY || !process.env.NEXT_PUBLIC_AWS_REGION) {
   throw new Error("AWS credentials or region are not defined in environment variables.");
 }
 
 const s3 = new S3Client({
-  region: process.env.AWS_REGION,
+  region: process.env.NEXT_PUBLIC_AWS_REGION,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
   },
 });
 
