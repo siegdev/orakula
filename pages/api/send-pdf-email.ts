@@ -1,3 +1,4 @@
+import { secret } from '@aws-amplify/backend'
 import nodemailer from 'nodemailer'
 
 export default async function handler(req, res) {
@@ -14,8 +15,8 @@ export default async function handler(req, res) {
     port: 587,
     secure: false,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user: secret('SMTP_USER') as unknown as string,
+      pass: secret('SMTP_PASS') as unknown as string,
     },
   })
 

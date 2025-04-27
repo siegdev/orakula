@@ -1,9 +1,10 @@
+import { secret } from '@aws-amplify/backend'
 import { S3 } from 'aws-sdk'
 
 const s3 = new S3({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
-  accessKeyId: process.env.VAR_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.VAR_AWS_SECRET_ACCESS_KEY,
+  accessKeyId: secret('ACCESS_KEY_ID') as unknown as string,
+  secretAccessKey: secret('SECRET_ACCESS_KEY') as unknown as string,
 })
 
 export default async function handler(req, res) {
