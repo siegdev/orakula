@@ -1,6 +1,6 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
   throw new Error("AWS credentials or region are not defined in environment variables.");
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const page = pdfDoc.addPage();
 
     // Defina a fonte que será usada no PDF
-    const font = await pdfDoc.embedFont(PDFDocument.Font.Helvetica);
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontSize = 12;
     
     // Aqui, convertemos o HTML para texto simples (você pode customizar essa parte conforme o seu conteúdo HTML)
