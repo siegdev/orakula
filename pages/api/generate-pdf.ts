@@ -1,11 +1,10 @@
 import puppeteer from 'puppeteer'
 import { S3 } from 'aws-sdk'
-import { secret } from '@aws-amplify/backend'
 
 const s3 = new S3({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
-  accessKeyId: secret('ACCESS_KEY_ID') as unknown as string,
-  secretAccessKey: secret('SECRET_ACCESS_KEY') as unknown as string,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

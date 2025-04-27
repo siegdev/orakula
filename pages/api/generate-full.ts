@@ -1,5 +1,5 @@
+// pages/api/generate.ts
 import { NextApiRequest, NextApiResponse } from 'next'
-import { secret } from '@aws-amplify/backend'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { name, birthdate, plan } = req.body
@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const chatRes = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${secret('OPEN_API_KEY')}`,
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
