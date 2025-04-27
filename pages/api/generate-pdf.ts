@@ -1,58 +1,64 @@
-import puppeteer from 'puppeteer'
-import { Upload } from '@aws-sdk/lib-storage';
-import { S3, ObjectCannedACL } from '@aws-sdk/client-s3';
+import { S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import chromium from "chrome-aws-lambda";
+import puppeteer from "puppeteer-core";
 
-if (!process.env.NEXT_PUBLIC_AWS_REGION || !process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || !process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY) {
-  throw new Error('Missing AWS configuration environment variables');
+if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
+  throw new Error("AWS credentials or region are not defined in environment variables.");
 }
 
-const s3 = new S3({
-  region: process.env.NEXT_PUBLIC_AWS_REGION,
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
   credentials: {
-    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function handler(req: any, res: any) {
-  console.dir('1');
-  if (req.method !== 'POST') return res.status(405).end()
-    console.dir('2');
-  const { html, session_id } = req.body
-  console.dir('3');
-  if (!html) {
-    return res.status(400).json({ error: 'HTML é obrigatório.' })
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
+
+  const { html, sessionId } = req.body;
+
+  if (!html || !sessionId) {
+    return res.status(400).json({ error: 'HTML e sessionId são obrigatórios.' });
   }
-  console.dir('4');
+
   try {
-    const browser = await puppeteer.launch()
-    const page = await browser.newPage()
-    await page.setContent(html, { waitUntil: 'networkidle0' })
-    console.dir('5');
-    const pdfBuffer = await page.pdf({ format: 'A4' })
-    await browser.close()
-    console.dir('6');
-    const pdfName = `leitura-${session_id}.pdf`
-    console.dir('7');
-    const params = {
-      Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!,
-      Key: `${pdfName}`,
-      Body: pdfBuffer,
-      ContentType: 'application/pdf',
-      ACL: ObjectCannedACL.public_read, 
-    }
-    console.dir('8');
-    const data = await new Upload({
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+    });
+
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    const pdfBuffer = await page.pdf({ format: 'a4' });
+
+    await browser.close();
+
+    const pdfKey = `leituras/${sessionId}.pdf`;  // Nome fixo usando o sessionId
+
+    const upload = new Upload({
       client: s3,
-      params,
-    }).done()
-    console.dir('9');
-    const pdfUrl = data.Location
-    console.dir('10');
-    return res.status(200).json({ pdfUrl })
+      params: {
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: pdfKey,
+        Body: pdfBuffer,
+        ContentType: 'application/pdf',
+        ACL: 'public-read',  // deixa o PDF acessível via link direto
+      },
+    });
+
+    await upload.done();
+
+    const pdfUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${pdfKey}`;
+
+    return res.status(200).json({ pdfUrl });
   } catch (error) {
-    console.error('Erro ao gerar PDF:', error)
-    return res.status(500).json({ error: 'Erro ao gerar PDF.' })
+    console.error('Erro ao gerar PDF:', error);
+    return res.status(500).json({ error: 'Erro ao gerar o PDF.' });
   }
 }
