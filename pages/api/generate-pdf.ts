@@ -53,7 +53,7 @@ export default async function handler(req, res) {
     const upload = new Upload({
       client: s3,
       params: {
-        Bucket: process.env.S3_BUCKET_NAME,
+        Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
         Key: pdfKey,
         Body: pdfBytes,
         ContentType: 'application/pdf',
