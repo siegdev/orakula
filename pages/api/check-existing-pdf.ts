@@ -33,6 +33,7 @@ export default async function handler(req, res) {
     const pdfUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${fileName}`
     return res.status(200).json({ pdfUrl })
   } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((error as any).code !== 'NotFound') {
       console.dir('aaa');
       console.error('Erro inesperado ao verificar PDF no S3:', error);
