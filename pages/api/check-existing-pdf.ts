@@ -25,11 +25,11 @@ export default async function handler(req, res) {
 
   try {
     await s3.send(new HeadObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME,
+      Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
       Key: pdfKey,
     }));
 
-    const pdfUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${pdfKey}`;
+    const pdfUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${pdfKey}`;
     return res.status(200).json({ exists: true, pdfUrl });
 
   } catch (error) {
