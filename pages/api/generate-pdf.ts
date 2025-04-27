@@ -18,9 +18,9 @@ const s3 = new S3Client({
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { html, sessionId } = req.body;
+  const { html, session_id } = req.body;
 
-  if (!html || !sessionId) {
+  if (!html || !session_id) {
     return res.status(400).json({ error: 'HTML e sessionId são obrigatórios.' });
   }
 
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
     await browser.close();
 
-    const pdfKey = `leituras/${sessionId}.pdf`;  // Nome fixo usando o sessionId
+    const pdfKey = `leituras/${session_id}.pdf`; 
 
     const upload = new Upload({
       client: s3,
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
         Key: pdfKey,
         Body: pdfBuffer,
         ContentType: 'application/pdf',
-        ACL: 'public-read',  // deixa o PDF acessível via link direto
+        ACL: 'public-read',
       },
     });
 
