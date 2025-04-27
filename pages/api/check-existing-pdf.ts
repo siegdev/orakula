@@ -1,54 +1,43 @@
-import { S3 } from '@aws-sdk/client-s3';
+import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
 
-const region = process.env.NEXT_PUBLIC_AWS_REGION;
-const accessKeyId = process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID;
-const secretAccessKey = process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY;
-
-if (!region || !accessKeyId || !secretAccessKey) {
-  throw new Error('AWS S3 configuration is missing or invalid');
+if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
+  throw new Error("AWS credentials or region are not defined in environment variables.");
 }
 
-const s3 = new S3({
-  region,
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
   credentials: {
-    accessKeyId,
-    secretAccessKey,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') return res.status(405).end()
-    console.dir('1a');
-  const { session_id } = req.query
-  if (!session_id) return res.status(400).json({ error: 'Missing session_id' })
-    console.dir('2b');
-  const bucketName = process.env.NEXT_PUBLIC_S3_BUCKET_NAME
-  const region = process.env.NEXT_PUBLIC_AWS_REGION
-  console.dir('3c');
-  if (!bucketName || !region) {
-    return res.status(500).json({ error: 'AWS S3 configuration is missing' })
+  if (req.method !== 'GET') return res.status(405).end();
+
+  const { session_id } = req.query;
+
+  if (!session_id) {
+    return res.status(400).json({ error: 'sessionId é obrigatório.' });
   }
-    
-  // Verifica se o arquivo existe no S3
+
+  const pdfKey = `leituras/${session_id}.pdf`;
+
   try {
-    const fileName = `leitura-${session_id}.pdf`
-    const params = {
-      Bucket: bucketName,
-      Key: fileName,
-    }
+    await s3.send(new HeadObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: pdfKey,
+    }));
 
-    await s3.headObject(params);
-    console.log('PDF já existe no S3.');
+    const pdfUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${pdfKey}`;
+    return res.status(200).json({ exists: true, pdfUrl });
 
-    const pdfUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${fileName}`
-    return res.status(200).json({ pdfUrl })
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).code !== 'NotFound') {
-      console.dir('aaa');
-      console.error('Erro inesperado ao verificar PDF no S3:', error);
-      console.dir('bbb');
-      return res.status(500).json({ error: 'Erro ao verificar o PDF' })
+    if ((error as any).name === 'NotFound' || (error as any).$metadata?.httpStatusCode === 404) {
+      return res.status(200).json({ exists: false });
     }
+    console.error('Erro inesperado ao verificar PDF no S3:', error);
+    return res.status(500).json({ error: 'Erro inesperado ao verificar o PDF.' });
   }
 }
