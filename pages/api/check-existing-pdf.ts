@@ -1,10 +1,20 @@
-import { S3 } from 'aws-sdk'
+import { S3 } from '@aws-sdk/client-s3';
+
+const region = process.env.NEXT_PUBLIC_AWS_REGION;
+const accessKeyId = process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID;
+const secretAccessKey = process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY;
+
+if (!region || !accessKeyId || !secretAccessKey) {
+  throw new Error('AWS S3 configuration is missing or invalid');
+}
 
 const s3 = new S3({
-  region: process.env.NEXT_PUBLIC_AWS_REGION,
-  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-})
+  region,
+  credentials: {
+    accessKeyId,
+    secretAccessKey,
+  },
+});
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end()
@@ -27,7 +37,7 @@ export default async function handler(req, res) {
       Key: fileName,
     }
 
-    await s3.headObject(params).promise();
+    await s3.headObject(params);
     console.log('PDF já existe no S3.');
 
     const pdfUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${fileName}`

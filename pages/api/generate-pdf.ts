@@ -1,11 +1,18 @@
 import puppeteer from 'puppeteer'
-import { S3 } from 'aws-sdk'
+import { Upload } from '@aws-sdk/lib-storage';
+import { S3, ObjectCannedACL } from '@aws-sdk/client-s3';
+
+if (!process.env.NEXT_PUBLIC_AWS_REGION || !process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || !process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY) {
+  throw new Error('Missing AWS configuration environment variables');
+}
 
 const s3 = new S3({
   region: process.env.NEXT_PUBLIC_AWS_REGION,
-  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-})
+  credentials: {
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
+  },
+});
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function handler(req: any, res: any) {
@@ -33,10 +40,13 @@ export default async function handler(req: any, res: any) {
       Key: `${pdfName}`,
       Body: pdfBuffer,
       ContentType: 'application/pdf',
-      ACL: 'public-read', 
+      ACL: ObjectCannedACL.public_read, 
     }
     console.dir('8');
-    const data = await s3.upload(params).promise()
+    const data = await new Upload({
+      client: s3,
+      params,
+    }).done()
     console.dir('9');
     const pdfUrl = data.Location
     console.dir('10');
