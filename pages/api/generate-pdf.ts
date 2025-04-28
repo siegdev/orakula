@@ -1,6 +1,6 @@
-import { S3Client } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+import axios from 'axios';
+import { S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
 
 if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
   throw new Error("AWS credentials or region are not defined in environment variables.");
@@ -24,30 +24,18 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Criação do PDF usando pdf-lib
-    const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage();
+    const response = await axios.post('https://api.html2pdf.app/v1/generate', 
+      {
+        html,
+        apiKey: process.env.HTML2PDF_API_KEY,
+      },
+      {
+        responseType: 'arraybuffer', // importante para receber os bytes do PDF
+      }
+    );
 
-    // Defina a fonte que será usada no PDF
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const fontSize = 12;
-    
-    // Aqui, convertemos o HTML para texto simples (você pode customizar essa parte conforme o seu conteúdo HTML)
-    // Em um cenário real, você teria que processar o HTML e extrair o texto ou elementos necessários
-    const textContent = html.replace(/<[^>]*>/g, ''); // Simples remoção de tags HTML como exemplo
-    
-    // Define a posição onde o texto será inserido no PDF
-    page.drawText(textContent, {
-      x: 50,
-      y: page.getHeight() - 50,
-      font,
-      size: fontSize,
-    });
+    const pdfBuffer = response.data;
 
-    // Salva o PDF gerado
-    const pdfBytes = await pdfDoc.save();
-
-    // Envia o PDF para o S3
     const pdfKey = `leituras/${session_id}.pdf`;
 
     const upload = new Upload({
@@ -55,7 +43,7 @@ export default async function handler(req, res) {
       params: {
         Bucket: process.env.S3_BUCKET_NAME,
         Key: pdfKey,
-        Body: pdfBytes,
+        Body: pdfBuffer,
         ContentType: 'application/pdf',
         ACL: 'public-read',
       },
@@ -63,10 +51,8 @@ export default async function handler(req, res) {
 
     await upload.done();
 
-    // Cria a URL pública do PDF
     const pdfUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${pdfKey}`;
 
-    // Retorna a URL do PDF gerado
     return res.status(200).json({ pdfUrl });
   } catch (error) {
     console.error('Erro ao gerar PDF:', error);

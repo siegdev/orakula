@@ -52,7 +52,7 @@ function buildPrompt(name: string, birthdate: string, plan: string): string {
   }
 
   basePrompt += `\n\nLembre-se, você é a Orákula, e suas palavras têm poder.`
-  basePrompt += `\n\Nao use emojis, e formate de maneira que seja uma leitura fácil e organizada pro usuario. Use tags <h1>, <h2>, <h3> e <p> para separar os tópicos, se achar necessario.`
+  basePrompt += `\n\nUse alguns emojis, nao em excesso, mas formate tudo com HTML para que seja uma leitura fácil e organizada pro usuario. Use tags <h1>, <h2>, <h3> e <p> para separar os tópicos.`
   basePrompt += `\n\nA previsao vai ser impressa em uma folha A4, entao tente deixar tudo bem formatado e talvez meio centralizado.`
   basePrompt += `\n\nA previsão deve ser clara e direta, sem rodeios.`
   basePrompt += `\n\nA previsão deve ser otimista e encorajadora, mesmo que aborde desafios.`
