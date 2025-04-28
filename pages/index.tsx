@@ -86,6 +86,7 @@ export default function Home() {
       <Card className="w-full max-w-md mt-10 text-white bg-white/10 backdrop-blur border-white/20">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold mb-4 text-center">Seu destino aguarda</h2>
+          <label>Seu primeiro nome:</label>
           <Input
             placeholder="Seu primeiro nome"
             className="mb-3"
@@ -93,6 +94,7 @@ export default function Home() {
             onChange={(e) => setName(e.target.value)}
             disabled={loading || preview != ''}
           />
+          <label>Seu e-mail:</label>
           <Input
             placeholder="Seu e-mail para envio da leitura"
             className="mb-4"
@@ -101,6 +103,7 @@ export default function Home() {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading || preview != ''}
           />
+          <label>Sua data de nascimento:</label>
           <Input
             placeholder="Sua data de nascimento"
             className="mb-4"
