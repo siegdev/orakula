@@ -93,7 +93,7 @@ const Success = () => {
 
   useEffect(() => {
     if (pdfUrl) {
-      router.push(`${process.env.NEXT_PUBLIC_BASE_URL}${pdfUrl}`)
+      router.push(`${pdfUrl}`)
     }
   }, [pdfUrl, router])
 

@@ -2,15 +2,15 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 
-if (!process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || !process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY || !process.env.NEXT_PUBLIC_AWS_REGION) {
+if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
   throw new Error("AWS credentials or region are not defined in environment variables.");
 }
 
 const s3 = new S3Client({
-  region: process.env.NEXT_PUBLIC_AWS_REGION,
+  region: process.env.AWS_REGION,
   credentials: {
-    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
 
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
     const upload = new Upload({
       client: s3,
       params: {
-        Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
+        Bucket: process.env.S3_BUCKET_NAME,
         Key: pdfKey,
         Body: pdfBytes,
         ContentType: 'application/pdf',
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
     await upload.done();
 
     // Cria a URL pública do PDF
-    const pdfUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${pdfKey}`;
+    const pdfUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${pdfKey}`;
 
     // Retorna a URL do PDF gerado
     return res.status(200).json({ pdfUrl });
