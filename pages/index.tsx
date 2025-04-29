@@ -186,7 +186,7 @@ export default function Home() {
       <div className="w-full max-w-3xl mt-10">
         <h3 className="text-3xl font-bold text-white mb-4">Perguntas Frequentes</h3>
         <div className="space-y-4">
-          {['O que é o Orákula?', 'Como funciona a previsão?', 'Preciso pagar para obter a previsão?', 'Posso acessar as previsões depois?'].map((question, index) => (
+          {['O que é o Orákula?', 'Como funciona a previsão?', 'Preciso pagar para obter a previsão?', 'Posso acessar as previsões depois?','Precisa entrar em contato?'].map((question, index) => (
             <div key={index} className="border-b border-white/20 pb-4">
               <div
                 className="flex justify-between items-center cursor-pointer text-white text-lg"
@@ -202,6 +202,7 @@ export default function Home() {
                   {index === 1 && "A previsão é gerada usando inteligência artificial, baseando-se em elementos astrológicos e numerológicos."}
                   {index === 2 && "Você pode experimentar uma previsão básica gratuitamente, mas para uma leitura completa, é necessário pagar."}
                   {index === 3 && "Sim! As previsões ficam disponíveis para você durante toda a sessão."}
+                  {index === 4 && "Bacana, vamos tentar te responder o mais breve possível! Envie um email para orakula.app@gmail.com."}
                 </p>
               )}
             </div>
