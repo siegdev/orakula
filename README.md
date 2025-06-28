@@ -4,6 +4,7 @@
 ![Next.js](https://img.shields.io/badge/Next.js-13-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.x-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+[![Coverage Status](https://coveralls.io/repos/github/siegdev/orakula/badge.svg?branch=main)](https://coveralls.io/github/siegdev/orakula?branch=main)
 
 > **Orákula** is a platform that generates personalized mystical predictions in PDF format, delivered straight to your email.
 
