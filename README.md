@@ -1,5 +1,6 @@
 # Orákula ✨
 
+![CI](https://github.com/siegdev/orakula/actions/workflows/ci.yml/badge.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-13-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.x-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
