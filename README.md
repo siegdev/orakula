@@ -41,9 +41,9 @@ npm run dev
 
 ## 🐳 Running with Docker
 
-\`\`\`bash
+```bash
 docker-compose up --build
-\`\`\`
+```
 
 Then access:
 
@@ -65,9 +65,9 @@ Then access:
 
 ## 🧪 Tests
 
-\`\`\`bash
+```bash
 npm run test
-\`\`\`
+```
 
 ---
 
