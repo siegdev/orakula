@@ -35,6 +35,7 @@ describe("/api/generate-pdf", () => {
   beforeEach(() => {
     postMock.mockReset();
     uploadDoneMock.mockReset();
+    jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
   it("should return 405 for non-POST methods", async () => {
